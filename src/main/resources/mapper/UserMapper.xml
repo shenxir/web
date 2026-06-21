@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.lostfound.mapper.UserMapper">
+
+    <resultMap id="UserResultMap" type="org.example.lostfound.model.User">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="realName" column="real_name"/>
+        <result property="role" column="role"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="studentId" column="student_id"/>
+        <result property="department" column="department"/>
+        <result property="avatar" column="avatar"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <!-- 用户登录 -->
+    <select id="login" resultMap="UserResultMap">
+        SELECT id, username, password, real_name, role, phone, email, student_id, department, avatar
+        FROM sys_user
+        WHERE username = #{username}
+        AND password = #{password}
+        AND status = 1
+        AND is_deleted = 0
+    </select>
+
+    <!-- 根据ID查询用户 -->
+    <select id="getUserById" resultMap="UserResultMap">
+        SELECT id, username, real_name AS realName, role, phone, email, student_id, department, avatar, created_at
+        FROM sys_user
+        WHERE id = #{userId} AND is_deleted = 0
+    </select>
+
+    <!-- 查询所有用户 -->
+    <select id="getAllUsers" resultMap="UserResultMap">
+        SELECT id, username, real_name AS realName, role, phone, email, student_id, department, avatar, created_at
+        FROM sys_user
+        WHERE is_deleted = 0
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 根据用户名查询用户 -->
+    <select id="getUserByUsername" resultMap="UserResultMap">
+        SELECT id, username, password, real_name, role, phone, email, student_id, department, avatar
+        FROM sys_user
+        WHERE username = #{username} AND is_deleted = 0
+    </select>
+
+    <!-- 查询用户统计信息 -->
+    <select id="getUserStats" resultType="java.util.Map">
+        SELECT
+            u.id AS userId,
+            u.real_name AS userName,
+            (SELECT COUNT(*) FROM lost_found_item i WHERE i.user_id = u.id AND i.is_deleted = 0) AS publishCount,
+            (SELECT COUNT(*) FROM item_claim c WHERE c.claimer_id = u.id) AS claimCount,
+            (SELECT COUNT(*) FROM item_claim c
+             LEFT JOIN lost_found_item i ON c.item_id = i.id
+             WHERE i.user_id = u.id AND c.status = 'approved') AS claimedCount
+        FROM sys_user u
+        WHERE u.id = #{userId} AND u.is_deleted = 0
+    </select>
+
+    <!-- 新增用户 -->
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user (username, password, real_name, role, phone, email, student_id, department)
+        VALUES (#{username}, #{password}, #{realName}, #{role}, #{phone}, #{email}, #{studentId}, #{department})
+    </insert>
+
+    <!-- 更新用户信息 -->
+    <update id="updateUser">
+        UPDATE sys_user
+        SET real_name = #{realName}, phone = #{phone}, email = #{email},
+            student_id = #{studentId}, department = #{department}, updated_at = NOW()
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 软删除用户 -->
+    <update id="deleteUser">
+        UPDATE sys_user SET is_deleted = 1, updated_at = NOW() WHERE id = #{userId}
+    </update>
+
+    <!-- 批量查询用户 -->
+    <select id="getUsersByIds" resultMap="UserResultMap">
+        SELECT id, username, real_name, role, phone, email, student_id, department
+        FROM sys_user
+        WHERE id IN
+        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+        AND is_deleted = 0
+    </select>
+
+</mapper>

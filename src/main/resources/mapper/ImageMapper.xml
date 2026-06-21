@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.lostfound.mapper.ImageMapper">
+
+    <resultMap id="ImageResultMap" type="org.example.lostfound.model.ItemImage">
+        <id property="id" column="id"/>
+        <result property="itemId" column="item_id"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="originalName" column="original_name"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <!-- 查询物品的所有图片 -->
+    <select id="getImagesByItemId" resultMap="ImageResultMap">
+        SELECT id, item_id, image_url, original_name, file_size, sort_order, created_at
+        FROM item_image
+        WHERE item_id = #{itemId}
+        ORDER BY sort_order ASC
+    </select>
+
+    <!-- 根据ID查询图片 -->
+    <select id="getImageById" resultMap="ImageResultMap">
+        SELECT id, item_id, image_url, original_name, file_size, sort_order, created_at
+        FROM item_image
+        WHERE id = #{imageId}
+    </select>
+
+    <!-- 新增图片 -->
+    <insert id="insertImage" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO item_image (item_id, image_url, original_name, file_size, sort_order)
+        VALUES (#{itemId}, #{imageUrl}, #{originalName}, #{fileSize}, #{sortOrder})
+    </insert>
+
+    <!-- 批量新增图片 -->
+    <insert id="batchInsertImages">
+        INSERT INTO item_image (item_id, image_url, original_name, file_size, sort_order)
+        VALUES
+        <foreach collection="images" item="image" separator=",">
+            (#{image.itemId}, #{image.imageUrl}, #{image.originalName}, #{image.fileSize}, #{image.sortOrder})
+        </foreach>
+    </insert>
+
+    <!-- 删除图片 -->
+    <delete id="deleteImage">
+        DELETE FROM item_image WHERE id = #{imageId}
+    </delete>
+
+    <!-- 删除物品的所有图片 -->
+    <delete id="deleteImagesByItemId">
+        DELETE FROM item_image WHERE item_id = #{itemId}
+    </delete>
+
+</mapper>

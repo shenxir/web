@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.lostfound.mapper.LocationMapper">
+
+    <resultMap id="LocationResultMap" type="org.example.lostfound.model.Location">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <!-- 查询所有启用的地点 -->
+    <select id="getAllLocations" resultMap="LocationResultMap">
+        SELECT id, name, sort_order, status
+        FROM sys_location
+        WHERE status = 1
+        ORDER BY sort_order ASC
+    </select>
+
+    <!-- 根据ID查询地点 -->
+    <select id="getLocationById" resultMap="LocationResultMap">
+        SELECT id, name, sort_order, status
+        FROM sys_location
+        WHERE id = #{locationId}
+    </select>
+
+    <!-- 根据名称查询地点 -->
+    <select id="getLocationByName" resultMap="LocationResultMap">
+        SELECT id, name, sort_order, status
+        FROM sys_location
+        WHERE name = #{name}
+    </select>
+
+    <!-- 新增地点 -->
+    <insert id="insertLocation" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_location (name, sort_order)
+        VALUES (#{name}, #{sortOrder})
+    </insert>
+
+    <!-- 更新地点 -->
+    <update id="updateLocation">
+        UPDATE sys_location
+        SET name = #{name}, sort_order = #{sortOrder}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除地点 -->
+    <update id="deleteLocation">
+        UPDATE sys_location SET status = 0 WHERE id = #{locationId}
+    </update>
+
+</mapper>

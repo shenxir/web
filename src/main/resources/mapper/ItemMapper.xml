@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.lostfound.mapper.ItemMapper">
+
+    <resultMap id="ItemResultMap" type="org.example.lostfound.model.Item">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="categoryName" column="category_name"/>
+        <result property="categoryIcon" column="category_icon"/>
+        <result property="locationId" column="location_id"/>
+        <result property="locationName" column="location_name"/>
+        <result property="publishDate" column="publish_date"/>
+        <result property="expiryDate" column="expiry_date"/>
+        <result property="status" column="status"/>
+        <result property="ownerType" column="owner_type"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="phone" column="phone"/>
+        <result property="views" column="views"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <!-- 物品详情查询（联表查询分类、地点、用户信息） -->
+    <select id="getItemById" resultMap="ItemResultMap">
+        SELECT
+            i.id, i.title, i.description,
+            i.category_id, c.name AS category_name, c.icon AS category_icon,
+            i.location_id, l.name AS location_name,
+            i.publish_date, i.expiry_date, i.status, i.owner_type,
+            i.user_id, u.real_name AS user_name,
+            i.phone, i.views, i.created_at
+        FROM lost_found_item i
+        LEFT JOIN sys_category c ON i.category_id = c.id
+        LEFT JOIN sys_location l ON i.location_id = l.id
+        LEFT JOIN sys_user u ON i.user_id = u.id AND u.is_deleted = 0
+        WHERE i.id = #{itemId} AND i.is_deleted = 0
+    </select>
+
+    <!-- 搜索物品（多条件联表查询） -->
+    <select id="searchItems" resultMap="ItemResultMap">
+        SELECT
+            i.id, i.title, i.description,
+            i.category_id, c.name AS category_name, c.icon AS category_icon,
+            i.location_id, l.name AS location_name,
+            i.publish_date, i.expiry_date, i.status, i.owner_type,
+            i.user_id, u.real_name AS user_name,
+            i.phone, i.views, i.created_at
+        FROM lost_found_item i
+        LEFT JOIN sys_category c ON i.category_id = c.id
+        LEFT JOIN sys_location l ON i.location_id = l.id
+        LEFT JOIN sys_user u ON i.user_id = u.id AND u.is_deleted = 0
+        WHERE i.is_deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (i.title LIKE CONCAT('%', #{keyword}, '%')
+                 OR i.description LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="categoryId != null">
+            AND i.category_id = #{categoryId}
+        </if>
+        <if test="locationId != null">
+            AND i.location_id = #{locationId}
+        </if>
+        <if test="status != null and status != ''">
+            AND i.status = #{status}
+        </if>
+        <if test="ownerType != null and ownerType != ''">
+            AND i.owner_type = #{ownerType}
+        </if>
+        <if test="userId != null">
+            AND i.user_id = #{userId}
+        </if>
+        ORDER BY i.created_at DESC
+    </select>
+
+    <!-- 查询所有物品 -->
+    <select id="getAllItems" resultMap="ItemResultMap">
+        SELECT
+            i.id, i.title, i.description,
+            i.category_id, c.name AS category_name, c.icon AS category_icon,
+            i.location_id, l.name AS location_name,
+            i.publish_date, i.expiry_date, i.status, i.owner_type,
+            i.user_id, u.real_name AS user_name,
+            i.phone, i.views, i.created_at
+        FROM lost_found_item i
+        LEFT JOIN sys_category c ON i.category_id = c.id
+        LEFT JOIN sys_location l ON i.location_id = l.id
+        LEFT JOIN sys_user u ON i.user_id = u.id AND u.is_deleted = 0
+        WHERE i.is_deleted = 0
+        ORDER BY i.created_at DESC
+    </select>
+
+    <!-- 查询用户的物品 -->
+    <select id="getUserItems" resultMap="ItemResultMap">
+        SELECT
+            i.id, i.title, i.description,
+            i.category_id, c.name AS category_name, c.icon AS category_icon,
+            i.location_id, l.name AS location_name,
+            i.publish_date, i.expiry_date, i.status, i.owner_type,
+            i.user_id, u.real_name AS user_name,
+            i.phone, i.views, i.created_at
+        FROM lost_found_item i
+        LEFT JOIN sys_category c ON i.category_id = c.id
+        LEFT JOIN sys_location l ON i.location_id = l.id
+        LEFT JOIN sys_user u ON i.user_id = u.id AND u.is_deleted = 0
+        WHERE i.user_id = #{userId} AND i.is_deleted = 0
+        ORDER BY i.created_at DESC
+    </select>
+
+    <!-- 查询最新物品 -->
+    <select id="getLatestItems" resultMap="ItemResultMap">
+        SELECT
+            i.id, i.title, i.description,
+            i.category_id, c.name AS category_name, c.icon AS category_icon,
+            i.location_id, l.name AS location_name,
+            i.publish_date, i.expiry_date, i.status, i.owner_type,
+            i.user_id, u.real_name AS user_name,
+            i.phone, i.views, i.created_at
+        FROM lost_found_item i
+        LEFT JOIN sys_category c ON i.category_id = c.id
+        LEFT JOIN sys_location l ON i.location_id = l.id
+        LEFT JOIN sys_user u ON i.user_id = u.id AND u.is_deleted = 0
+        WHERE i.status = 'pending' AND i.is_deleted = 0
+        ORDER BY i.created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 新增物品 -->
+    <insert id="insertItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO lost_found_item (title, description, category_id, location_id, publish_date,
+            expiry_date, status, owner_type, user_id, phone)
+        VALUES (#{title}, #{description}, #{categoryId}, #{locationId}, #{publishDate},
+            #{expiryDate}, #{status}, #{ownerType}, #{userId}, #{phone})
+    </insert>
+
+    <!-- 更新物品状态 -->
+    <update id="updateItemStatus">
+        UPDATE lost_found_item
+        SET status = #{status}, updated_at = NOW()
+        WHERE id = #{itemId} AND is_deleted = 0
+    </update>
+
+    <!-- 批量更新过期物品 -->
+    <update id="autoExpireItems">
+        UPDATE lost_found_item
+        SET status = 'expired', updated_at = NOW()
+        WHERE status = 'pending' AND expiry_date <![CDATA[<]]> CURDATE() AND is_deleted = 0
+    </update>
+
+    <!-- 软删除物品 -->
+    <update id="deleteItem">
+        UPDATE lost_found_item
+        SET is_deleted = 1, updated_at = NOW()
+        WHERE id = #{itemId}
+    </update>
+
+    <!-- 检查重复发布 -->
+    <select id="checkDuplicate" resultType="int">
+        SELECT COUNT(*)
+        FROM lost_found_item
+        WHERE user_id = #{userId} AND title = #{title}
+        AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR) AND is_deleted = 0
+    </select>
+
+    <!-- 查询物品统计信息 -->
+    <select id="getItemStats" resultType="java.util.Map">
+        SELECT
+            (SELECT COUNT(*) FROM lost_found_item WHERE is_deleted = 0) AS totalItems,
+            (SELECT COUNT(*) FROM lost_found_item WHERE status = 'pending' AND is_deleted = 0) AS pendingItems,
+            (SELECT COUNT(*) FROM lost_found_item WHERE status = 'claimed' AND is_deleted = 0) AS claimedItems,
+            (SELECT COUNT(*) FROM lost_found_item WHERE status = 'expired' AND is_deleted = 0) AS expiredItems,
+            (SELECT COUNT(*) FROM lost_found_item WHERE owner_type = 'lost' AND is_deleted = 0) AS lostItems,
+            (SELECT COUNT(*) FROM lost_found_item WHERE owner_type = 'found' AND is_deleted = 0) AS foundItems,
+            (SELECT COUNT(*) FROM item_claim WHERE status = 'pending') AS pendingClaims
+    </select>
+
+    <!-- 查询分类统计 -->
+    <select id="getCategoryStats" resultType="java.util.Map">
+        SELECT c.name AS category, COUNT(i.id) AS count,
+            SUM(CASE WHEN i.owner_type = 'lost' THEN 1 ELSE 0 END) AS lostCount,
+            SUM(CASE WHEN i.owner_type = 'found' THEN 1 ELSE 0 END) AS foundCount
+        FROM lost_found_item i
+        LEFT JOIN sys_category c ON i.category_id = c.id
+        WHERE i.is_deleted = 0
+        GROUP BY c.name ORDER BY count DESC
+    </select>
+
+    <!-- 查询地点统计 -->
+    <select id="getLocationStats" resultType="java.util.Map">
+        SELECT l.name AS location, COUNT(i.id) AS count,
+            SUM(CASE WHEN i.status = 'pending' THEN 1 ELSE 0 END) AS pendingCount
+        FROM lost_found_item i
+        LEFT JOIN sys_location l ON i.location_id = l.id
+        WHERE i.is_deleted = 0
+        GROUP BY l.name ORDER BY count DESC
+    </select>
+
+    <!-- 增加浏览次数 -->
+    <update id="incrementViews">
+        UPDATE lost_found_item SET views = views + 1 WHERE id = #{itemId} AND is_deleted = 0
+    </update>
+
+    <!-- 检查物品是否可被认领 -->
+    <select id="checkItemClaimable" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM lost_found_item
+        WHERE id = #{itemId} AND status = 'pending' AND expiry_date <![CDATA[>=]]> CURDATE() AND is_deleted = 0
+    </select>
+
+    <!-- 检查用户是否已认领过该物品 -->
+    <select id="checkUserClaimed" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM item_claim
+        WHERE item_id = #{itemId} AND claimer_id = #{userId} AND status != 'rejected'
+    </select>
+
+</mapper>
