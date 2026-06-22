@@ -19,11 +19,12 @@ const menuItems = computed(() => {
   const items = [
     { path: '/', label: '首页', icon: HomeFilled },
     { path: '/items', label: '物品列表', icon: Document },
-    { path: '/publish', label: '发布信息', icon: Edit },
   ]
 
+  // 管理员没有发布信息功能
   if (!isAdmin.value) {
     items.push(
+      { path: '/publish', label: '发布信息', icon: Edit },
       { path: '/my/items', label: '我的发布', icon: User },
       { path: '/my/claims', label: '我的认领', icon: Document }
     )

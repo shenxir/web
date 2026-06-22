@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useItemsStore } from '@/stores/items.js'
 import { getStatusInfo, getOwnerTypeLabel, getOwnerTypeTag, formatDate, daysUntilExpiry } from '@/utils/helpers.js'
 import { ElMessage, ElTable, ElTableColumn, ElTag, ElButton, ElSelect, ElOption, ElInput, ElPopconfirm, ElEmpty } from 'element-plus'
-import { Search, View, Delete, Bottom } from '@element-plus/icons-vue'
+import { Search, View, Bottom } from '@element-plus/icons-vue'
 import api from '@/api'
 
 const router = useRouter()
@@ -58,12 +58,6 @@ async function loadItems() {
 async function handleForceExpire(item) {
   await itemsStore.updateItemStatus(item.id, 'expired')
   ElMessage.success('已强制下架')
-  await loadItems()
-}
-
-async function handleDelete(item) {
-  await itemsStore.deleteItem(item.id)
-  ElMessage.success('已删除')
   await loadItems()
 }
 
@@ -150,89 +144,106 @@ function getCategoryIcon(categoryIcon) {
 
       <el-empty v-else-if="items.length === 0" description="暂无物品数据" />
 
-      <el-table v-else :data="items" style="width: 100%;" stripe>
-        <!-- 类型列 -->
-        <el-table-column label="类型" width="100">
-          <template #default="{ row }">
-            <el-tag :type="getOwnerTypeTag(row.ownerType)" size="small" effect="dark">
-              {{ getOwnerTypeLabel(row.ownerType) }}
-            </el-tag>
-          </template>
-        </el-table-column>
+      <div v-else class="table-container">
+        <el-table :data="items" stripe border style="width: 100%;">
+          <!-- 类型列 -->
+          <el-table-column label="类型" width="70" align="center">
+            <template #default="{ row }">
+              <el-tag :type="getOwnerTypeTag(row.ownerType)" size="small" effect="dark">
+                {{ getOwnerTypeLabel(row.ownerType) }}
+              </el-tag>
+            </template>
+          </el-table-column>
 
-        <!-- 物品信息列 -->
-        <el-table-column label="物品信息" min-width="200">
-          <template #default="{ row }">
-            <div class="item-info">
-              <div class="item-thumb" :class="row.ownerType">
-                <img v-if="row.images && row.images.length > 0"
-                     :src="row.images[0].imageUrl"
-                     class="item-thumb-img" />
-                <span v-else class="item-thumb-icon">{{ getCategoryIcon(row.categoryIcon) }}</span>
+          <!-- 物品信息列 -->
+          <el-table-column label="物品信息" min-width="150">
+            <template #default="{ row }">
+              <div class="item-info">
+                <div class="item-thumb" :class="row.ownerType">
+                  <img v-if="row.images && row.images.length > 0"
+                       :src="row.images[0].imageUrl"
+                       class="item-thumb-img" />
+                  <span v-else class="item-thumb-icon">{{ getCategoryIcon(row.categoryIcon) }}</span>
+                </div>
+                <div class="item-detail">
+                  <div class="item-title" @click="goToDetail(row)">{{ row.title }}</div>
+                  <div class="item-meta">{{ row.categoryName }} · {{ row.locationName }}</div>
+                </div>
               </div>
-              <div class="item-detail">
-                <div class="item-title" @click="goToDetail(row)">{{ row.title }}</div>
-                <div class="item-meta">{{ row.categoryName }} · {{ row.locationName }}</div>
+            </template>
+          </el-table-column>
+
+          <!-- 发布者 -->
+          <el-table-column label="发布者" width="70" prop="userName" align="center" />
+
+          <!-- 状态列 -->
+          <el-table-column label="状态" width="80" align="center">
+            <template #default="{ row }">
+              <el-tag :type="getStatusInfo(row.status, row.ownerType).type" size="small">
+                {{ getStatusInfo(row.status, row.ownerType).label }}
+              </el-tag>
+            </template>
+          </el-table-column>
+
+          <!-- 发布日期 -->
+          <el-table-column label="发布时间" width="90" align="center">
+            <template #default="{ row }">
+              {{ formatDate(row.publishDate) }}
+            </template>
+          </el-table-column>
+
+          <!-- 浏览量 -->
+          <el-table-column label="浏览" width="50" prop="views" align="center" />
+
+          <!-- 操作列 -->
+          <el-table-column label="操作" width="160" fixed="right" align="center">
+            <template #default="{ row }">
+              <div class="action-cell">
+                <el-button type="primary" size="small" :icon="View" @click="goToDetail(row)">
+                  查看
+                </el-button>
+                <el-popconfirm
+                  v-if="row.status === 'pending'"
+                  title="确定要强制下架吗？"
+                  @confirm="handleForceExpire(row)"
+                >
+                  <template #reference>
+                    <el-button type="warning" size="small" :icon="Bottom" plain>下架</el-button>
+                  </template>
+                </el-popconfirm>
               </div>
-            </div>
-          </template>
-        </el-table-column>
-
-        <!-- 发布者 -->
-        <el-table-column label="发布者" width="100" prop="userName" />
-
-        <!-- 状态列 -->
-        <el-table-column label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag :type="getStatusInfo(row.status, row.ownerType).type" size="small">
-              {{ getStatusInfo(row.status, row.ownerType).label }}
-            </el-tag>
-          </template>
-        </el-table-column>
-
-        <!-- 发布日期 -->
-        <el-table-column label="发布时间" width="110">
-          <template #default="{ row }">
-            {{ formatDate(row.publishDate) }}
-          </template>
-        </el-table-column>
-
-        <!-- 浏览量 -->
-        <el-table-column label="浏览" width="70" prop="views" />
-
-        <!-- 操作列 -->
-        <el-table-column label="操作" width="180" fixed="right">
-          <template #default="{ row }">
-            <div class="action-cell">
-              <el-button type="primary" size="small" :icon="View" @click="goToDetail(row)">
-                查看
-              </el-button>
-              <el-popconfirm
-                v-if="row.status === 'pending'"
-                title="确定要强制下架吗？"
-                @confirm="handleForceExpire(row)"
-              >
-                <template #reference>
-                  <el-button type="warning" size="small" :icon="Bottom" plain>下架</el-button>
-                </template>
-              </el-popconfirm>
-              <el-popconfirm
-                title="确定要删除吗？此操作不可恢复。"
-                @confirm="handleDelete(row)"
-              >
-                <template #reference>
-                  <el-button type="danger" size="small" :icon="Delete" plain>删除</el-button>
-                </template>
-              </el-popconfirm>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+/* 表格容器 */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table-container :deep(.el-table) {
+  border-radius: 8px;
+}
+
+.table-container :deep(.el-table th) {
+  background-color: #f5f7fa !important;
+  font-weight: 600;
+}
+
+.table-container :deep(.el-table td) {
+  padding: 8px 0;
+}
+
+.table-container :deep(.el-table .cell) {
+  padding: 0 8px;
+}
+
 /* 统计卡片 */
 .stats-row {
   display: flex;

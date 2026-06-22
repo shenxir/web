@@ -24,6 +24,18 @@ public class AuthController {
     }
 
     /**
+     * 用户注册
+     */
+    @PostMapping("/register")
+    public Map<String, Object> register(@RequestBody Map<String, String> params) {
+        String username = params.get("username");
+        String password = params.get("password");
+        String realName = params.get("realName");
+        String phone = params.get("phone");
+        return userService.register(username, password, realName, phone);
+    }
+
+    /**
      * 获取用户信息
      */
     @GetMapping("/userinfo")
@@ -38,5 +50,16 @@ public class AuthController {
             result.put("message", "用户不存在");
         }
         return result;
+    }
+
+    /**
+     * 修改密码
+     */
+    @PostMapping("/password")
+    public Map<String, Object> changePassword(@RequestBody Map<String, String> params) {
+        Integer userId = Integer.parseInt(params.get("userId"));
+        String oldPassword = params.get("oldPassword");
+        String newPassword = params.get("newPassword");
+        return userService.changePassword(userId, oldPassword, newPassword);
     }
 }

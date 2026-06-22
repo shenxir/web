@@ -32,6 +32,36 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
+   * 注册
+   */
+  async function register(userData) {
+    try {
+      const data = await api.post('/auth/register', userData)
+      return data
+    } catch (e) {
+      console.error('注册失败:', e)
+      return { success: false, message: '注册失败，请重试' }
+    }
+  }
+
+  /**
+   * 修改密码
+   */
+  async function changePassword(oldPassword, newPassword) {
+    try {
+      const data = await api.post('/auth/password', {
+        userId: currentUser.value.id,
+        oldPassword,
+        newPassword
+      })
+      return data
+    } catch (e) {
+      console.error('修改密码失败:', e)
+      return { success: false, message: '修改密码失败，请重试' }
+    }
+  }
+
+  /**
    * 登出
    */
   function logout() {
@@ -52,6 +82,8 @@ export const useAuthStore = defineStore('auth', () => {
     isAdmin,
     userId,
     login,
+    register,
+    changePassword,
     logout,
     getDisplayName
   }

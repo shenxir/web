@@ -105,10 +105,9 @@ public class ItemService {
             return result;
         }
 
-        // 计算过期日期
+        // 计算过期日期（统一7天过期）
         LocalDate today = LocalDate.now();
-        long expiryDays = "lost".equals(item.getOwnerType()) ? 30 : 15;
-        String expiryDate = today.plusDays(expiryDays).format(DATE_FMT);
+        String expiryDate = today.plusDays(7).format(DATE_FMT);
 
         // 设置默认值
         item.setPublishDate(today.format(DATE_FMT));

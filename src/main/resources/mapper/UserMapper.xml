@@ -82,6 +82,13 @@
         UPDATE sys_user SET is_deleted = 1, updated_at = NOW() WHERE id = #{userId}
     </update>
 
+    <!-- 修改密码 -->
+    <update id="updatePassword">
+        UPDATE sys_user
+        SET password = #{newPassword}, updated_at = NOW()
+        WHERE id = #{userId} AND password = #{oldPassword} AND is_deleted = 0
+    </update>
+
     <!-- 批量查询用户 -->
     <select id="getUsersByIds" resultMap="UserResultMap">
         SELECT id, username, real_name, role, phone, email, student_id, department

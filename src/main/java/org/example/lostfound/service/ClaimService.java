@@ -104,6 +104,14 @@ public class ClaimService {
             return result;
         }
 
+        // 检查是否认领自己的物品
+        org.example.lostfound.model.Item item = itemService.getItemById(claim.getItemId());
+        if (item != null && item.getUserId().equals(claim.getClaimerId())) {
+            result.put("success", false);
+            result.put("message", "不能认领自己发布的物品");
+            return result;
+        }
+
         // 检查用户是否已认领过
         if (itemService.checkUserClaimed(claim.getItemId(), claim.getClaimerId())) {
             result.put("success", false);

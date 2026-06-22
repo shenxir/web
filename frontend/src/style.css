@@ -123,7 +123,9 @@ a {
   flex: 1;
   padding: 24px;
   overflow-y: auto;
+  overflow-x: hidden;
   background-color: #f5f7fa;
+  min-width: 0;
 }
 
 .page-header {
@@ -148,6 +150,8 @@ a {
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  overflow: visible;
+  max-width: 100%;
 }
 
 /* ==================== 统计卡片 ==================== */

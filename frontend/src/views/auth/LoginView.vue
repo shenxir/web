@@ -33,16 +33,6 @@ async function handleLogin() {
     ElMessage.error(result.message)
   }
 }
-
-function fillAdmin() {
-  form.username = 'admin'
-  form.password = 'admin123'
-}
-
-function fillUser() {
-  form.username = 'zhangsan'
-  form.password = '123456'
-}
 </script>
 
 <template>
@@ -87,17 +77,10 @@ function fillUser() {
       </el-form>
 
       <div class="login-footer">
-        <div class="demo-hint">
-          <p><strong>演示账号</strong></p>
-          <p>
-            管理员：
-            <el-button link type="primary" @click="fillAdmin">admin / admin123</el-button>
-          </p>
-          <p>
-            普通用户：
-            <el-button link type="primary" @click="fillUser">zhangsan / 123456</el-button>
-          </p>
-        </div>
+        <p>
+          还没有账号？
+          <router-link to="/register" style="color: #667eea; font-weight: 500;">立即注册</router-link>
+        </p>
       </div>
     </div>
   </div>

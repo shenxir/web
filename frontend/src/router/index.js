@@ -35,6 +35,17 @@ const routes = [
     }
   },
   {
+    path: '/register',
+    name: 'Register',
+    component: () => import('../views/auth/RegisterView.vue'),
+    meta: {
+      title: '注册',
+      requiresAuth: false,
+      guestOnly: true,
+      layout: 'blank'
+    }
+  },
+  {
     path: '/items',
     name: 'ItemList',
     component: () => import('../views/items/ItemListView.vue'),

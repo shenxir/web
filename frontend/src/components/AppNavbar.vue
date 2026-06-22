@@ -1,9 +1,10 @@
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.js'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { User, SwitchButton } from '@element-plus/icons-vue'
+import { User, SwitchButton, Lock } from '@element-plus/icons-vue'
+import ChangePasswordDialog from './ChangePasswordDialog.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -11,6 +12,8 @@ const authStore = useAuthStore()
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 const isAdmin = computed(() => authStore.isAdmin)
 const userName = computed(() => authStore.getDisplayName())
+
+const showChangePassword = ref(false)
 
 function handleLogout() {
   ElMessageBox.confirm('确定要退出登录吗？', '提示', {
@@ -43,6 +46,10 @@ function handleLogout() {
             <el-dropdown-menu>
               <el-dropdown-item v-if="!isAdmin" @click="router.push('/my/items')">我的发布</el-dropdown-item>
               <el-dropdown-item v-if="!isAdmin" @click="router.push('/my/claims')">我的认领</el-dropdown-item>
+              <el-dropdown-item @click="showChangePassword = true">
+                <el-icon><Lock /></el-icon>
+                修改密码
+              </el-dropdown-item>
               <el-dropdown-item divided @click="handleLogout">
                 <el-icon><SwitchButton /></el-icon>
                 退出登录
@@ -59,6 +66,9 @@ function handleLogout() {
       </template>
     </div>
   </el-header>
+
+  <!-- 修改密码对话框 -->
+  <ChangePasswordDialog v-model:visible="showChangePassword" />
 </template>
 
 <style scoped>

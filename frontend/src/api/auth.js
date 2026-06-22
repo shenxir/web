@@ -43,10 +43,20 @@ export function changePassword(data) {
   return api.post('/auth/password', data)
 }
 
+/**
+ * 用户注册
+ * @param {object} data - { username, password, realName, phone }
+ * @returns {Promise}
+ */
+export function register(data) {
+  return api.post('/auth/register', data)
+}
+
 export default {
   login,
   logout,
   getUserInfo,
   updateUserInfo,
-  changePassword
+  changePassword,
+  register
 }

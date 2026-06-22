@@ -40,6 +40,6 @@ const isCollapsed = computed(() => sidebarRef.value?.isCollapsed ?? true)
   flex: 1;
   padding: 24px;
   background: #f5f7fa;
-  overflow-y: auto;
+  overflow: auto;
 }
 </style>

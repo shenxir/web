@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.js'
 import { getStatusInfo, getOwnerTypeLabel, getOwnerTypeTag, formatDate, daysUntilExpiry, canClaimItem } from '@/utils/helpers.js'
@@ -12,6 +12,11 @@ const authStore = useAuthStore()
 
 const item = ref(null)
 const loading = ref(true)
+
+// 是否是物品发布者本人
+const isOwner = computed(() => {
+  return authStore.isLoggedIn && item.value && authStore.userId === item.value.userId
+})
 
 // 加载物品详情
 onMounted(async () => {
@@ -68,6 +73,11 @@ function openClaimDialog() {
     return
   }
 
+  if (isOwner.value) {
+    ElMessage.warning('不能认领自己发布的物品')
+    return
+  }
+
   if (item.value.status !== 'pending') {
     ElMessage.warning('该物品当前不可认领')
     return
@@ -117,17 +127,6 @@ async function handleForceExpire() {
     await loadItem()
   } catch (e) {
     ElMessage.error('操作失败')
-  }
-}
-
-// 管理员操作：删除物品
-async function handleDelete() {
-  try {
-    await api.delete(`/items/${item.value.id}`)
-    ElMessage.success('已删除')
-    router.push('/items')
-  } catch (e) {
-    ElMessage.error('删除失败')
   }
 }
 </script>
@@ -262,21 +261,11 @@ async function handleDelete() {
                     </el-button>
                   </template>
                 </el-popconfirm>
-                <el-popconfirm
-                  title="确定要删除该物品吗？此操作不可恢复。"
-                  @confirm="handleDelete"
-                >
-                  <template #reference>
-                    <el-button type="danger" class="action-btn">
-                      🗑️ 删除物品
-                    </el-button>
-                  </template>
-                </el-popconfirm>
               </template>
 
               <!-- 普通用户操作 -->
               <template v-else>
-                <template v-if="item.status === 'pending'">
+                <template v-if="item.status === 'pending' && !isOwner">
                   <el-button
                     type="primary"
                     class="action-btn"
@@ -284,6 +273,14 @@ async function handleDelete() {
                   >
                     {{ item.ownerType === 'lost' ? '🙋 申请认领' : '🙋 申请招领' }}
                   </el-button>
+                </template>
+
+                <template v-if="item.status === 'pending' && isOwner">
+                  <el-result
+                    icon="info"
+                    title="这是您发布的物品"
+                    sub-title="其他人可以申请认领此物品"
+                  />
                 </template>
 
                 <template v-else-if="item.status === 'claimed'">
