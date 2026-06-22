@@ -46,6 +46,16 @@ const routes = [
     }
   },
   {
+    path: '/change-password',
+    name: 'ChangePassword',
+    component: () => import('../views/auth/ChangePasswordView.vue'),
+    meta: {
+      title: '修改密码',
+      requiresAuth: false,
+      layout: 'blank'
+    }
+  },
+  {
     path: '/items',
     name: 'ItemList',
     component: () => import('../views/items/ItemListView.vue'),

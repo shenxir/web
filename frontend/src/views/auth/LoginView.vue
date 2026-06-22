@@ -81,6 +81,9 @@ async function handleLogin() {
           还没有账号？
           <router-link to="/register" style="color: #667eea; font-weight: 500;">立即注册</router-link>
         </p>
+        <p style="margin-top: 8px;">
+          <router-link to="/change-password" style="color: #909399; font-size: 13px;">忘记密码？修改密码</router-link>
+        </p>
       </div>
     </div>
   </div>

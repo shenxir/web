@@ -1,0 +1,106 @@
+@startuml
+left to right direction
+skinparam actorStyle stickman
+' Actor样式优化
+skinparam actor {
+    BackgroundColor #667EEA
+    FontColor white
+    FontSize 15
+}
+skinparam usecaseBackgroundColor #F5F7FA
+skinparam usecaseBorderColor #667EEA
+skinparam rectangle {
+    BorderColor #333
+    BackgroundColor white
+}
+skinparam defaultFontSize 14
+skinparam useCaseFontSize 13
+skinparam packageFontStyle bold
+skinparam nodesep 35
+skinparam ranksep 45
+skinparam linetype ortho
+
+title 校园失物招领系统用例图
+
+' 参与者定义
+actor "普通用户" as User
+actor "管理员" as Admin
+
+' ========== 标准：唯一外层系统边界矩形 ==========
+rectangle 校园失物招领系统 {
+    ' 使用package划分模块（UML用例标准分组，替代rectangle）
+    package 用户模块 {
+        (注册账号) as UC1
+        (登录系统) as UC2
+        (修改密码) as UC3
+    }
+
+    package 物品发布模块 {
+        (发布失物信息) as UC4
+        (发布拾物信息) as UC5
+        (上传实物图片) as UC6
+        (查看我的发布) as UC7
+    }
+
+    package 物品浏览模块 {
+        (浏览物品列表) as UC8
+        (多条件筛选) as UC9
+        (查看物品详情) as UC10
+        (放大查看图片) as UC11
+    }
+
+    package 认领模块 {
+        (申请认领物品) as UC12
+        (填写认领理由) as UC13
+        (查看我的认领) as UC14
+        (认领权限校验) as UC15
+    }
+
+    package 管理后台模块 {
+        (查看数据概览) as UC16
+        (管理物品列表) as UC17
+        (强制下架物品) as UC18
+        (审核认领申请) as UC19
+        (管理公告信息) as UC20
+    }
+
+    package 系统自动处理 {
+        (物品自动过期) as UC21
+        (重复发布校验) as UC22
+        (状态自动流转) as UC23
+    }
+}
+
+' 普通用户关联关系
+User -- UC1
+User -- UC2
+User -- UC3
+User -- UC4
+User -- UC5
+User -- UC7
+User -- UC8
+User -- UC10
+User -- UC12
+User -- UC14
+
+' 管理员关联关系
+Admin -- UC2
+Admin -- UC16
+Admin -- UC17
+Admin -- UC19
+Admin -- UC20
+
+' <<include>> 包含关系（虚线箭头指向被包含用例）
+UC4 ..-> UC6 : <<include>>
+UC5 ..-> UC6 : <<include>>
+UC12 ..-> UC13 : <<include>>
+UC12 ..-> UC15 : <<include>>
+UC8 ..-> UC9 : <<include>>
+UC10 ..-> UC11 : <<include>>
+UC17 ..-> UC18 : <<include>>
+
+' <<extend>> 扩展关系（虚线箭头指向基础用例）
+UC22 ..-> UC12 : <<extend>>
+UC21 ..-> UC17 : <<extend>>
+UC23 ..-> UC12 : <<extend>>
+@enduml
